@@ -25,8 +25,10 @@ const char kStartQuery[] = "spinmebaby";
 const char kStopQuery[] = "stop";
 const char kSpeedQuery[] = "speed";
 const char kBatteryQuery[]  = "battery";
-const char kStartCommand[] = "w axis0.requested_state 5\n";
+const char kStartCommand[] = "w axis0.controller.vel_ramp_enable 1\n"
+                             "w axis0.requested_state 5\n";
 const char kStopCommand[]  = "w axis0.requested_state 1\n";
+const char kSpeedCommand[] = "w axis0.controller.vel_ramp_target %d\n";
 const char kBatteryCommand[]  = "r vbus_voltage\n";
 const char kBatteryError[]  = "BATTERY LOW\n";
 
@@ -69,9 +71,9 @@ void min_application_handler(uint8_t min_id, uint8_t *min_payload,
     Serial.println("Received speed!");
     int speed = 0;
     if (sscanf(buf, "speed %d", &speed) != EOF) {
-      sprintf(buf, "v 0 %d\n", speed);
+      sprintf(buf, kSpeedCommand, speed);
     } else {
-      sprintf(buf, "v 0 0\n");
+      sprintf(buf, kSpeedCommand, 0); ;
     }
   }
   buf_len = strlen(buf);
@@ -86,7 +88,6 @@ void setup()
   S6C.begin(9600);
   ODRIVE.begin(115200);
   Serial.begin(9600);
-  while (!Serial);
   pinMode(LED_PIN, OUTPUT);
   min_init_context(&min_ctx, 0);
   battery_time = millis();
