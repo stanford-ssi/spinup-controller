@@ -66,7 +66,7 @@ void min_application_handler(uint8_t min_id, uint8_t *min_payload,
     strncpy(buf, kStopCommand, strlen(kStopCommand) + 1);
   } else if (strncmp(buf, kBatteryQuery, strlen(kBatteryQuery)) == 0) {
     Serial.println("Received battery!");
-    strncpy(buf, kBatteryCommand, strlen(kStopCommand) + 1);
+    strncpy(buf, kBatteryCommand, strlen(kBatteryCommand) + 1);
   } else if (strncmp(buf, kSpeedQuery, strlen(kSpeedQuery)) == 0) {
     Serial.println("Received speed!");
     int speed = 0;
