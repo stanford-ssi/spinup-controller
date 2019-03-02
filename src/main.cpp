@@ -24,20 +24,22 @@ const unsigned int kODriveTimeout = 1000;
 const char kStartQuery[] = "spinmebaby";
 const char kStopQuery[] = "stop";
 const char kSpeedQuery[] = "speed";
-const char kBatteryQuery[]  = "battery";
+const char kReadQuery[] = "read";
+const char kBatteryQuery[] = "battery";
 const char kStartCommand[] = "w axis0.controller.vel_ramp_enable 1\n"
                              "w axis0.requested_state 5\n";
-const char kStopCommand[]  = "w axis0.requested_state 1\n";
+const char kStopCommand[] = "w axis0.requested_state 1\n";
 const char kSpeedCommand[] = "w axis0.controller.vel_ramp_target %d\n";
-const char kBatteryCommand[]  = "r vbus_voltage\n";
-const char kBatteryError[]  = "BATTERY LOW\n";
+const char kReadCommand[] = "r axis0.sensorless_estimator.vel_estimate\n";
+const char kBatteryCommand[] = "r vbus_voltage\n";
+const char kBatteryError[] = "BATTERY LOW\n";
 
 void min_tx_start(uint8_t port) {}
 void min_tx_finished(uint8_t port) {}
 
 uint16_t min_tx_space(uint8_t port)
 {
-  return ODRIVE.availableForWrite();
+  return S6C.availableForWrite();
 }
 
 void min_tx_byte(uint8_t port, uint8_t byte)
@@ -75,6 +77,9 @@ void min_application_handler(uint8_t min_id, uint8_t *min_payload,
     } else {
       sprintf(buf, kSpeedCommand, 0); ;
     }
+  } else if (strncmp(buf, kReadQuery, strlen(kReadQuery)) == 0) {
+    Serial.println("Received read!");
+    strncpy(buf, kReadCommand, strlen(kReadCommand) + 1);
   }
   buf_len = strlen(buf);
   ODRIVE.write(buf, buf_len);
@@ -103,7 +108,7 @@ void loop()
     unsigned long start = millis();
     while(ODRIVE.available() > 0 && millis() - start < kODriveTimeout) { 
       Serial.println("Waiting!");
-      delay(10); // TODO: add timeout
+      delay(10);
     }
     ODRIVE.readBytes(buf, 64U);
     float voltage;
